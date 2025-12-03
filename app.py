@@ -43,10 +43,19 @@ display_data = filtered_data.head(num_rows)
 
 # Простейшее объединение / группировка
 if st.checkbox("Группировка по категориальному столбцу"):
-    cat_column = st.selectbox("Выберите столбец для группировки", options=data.select_dtypes('object').columns.tolist())
-    agg_column = st.selectbox("Выберите числовой столбец для агрегации", options=data.select_dtypes('number').columns.tolist())
-    display_data = data.groupby(cat_column)[agg_column].mean().reset_index()
-    st.write(f"Группировка по {cat_column}, среднее значение {agg_column}")
+    cat_columns = st.multiselect(
+        "Выберите столбцы для группировки (можно несколько)",
+        options=data.select_dtypes('object').columns.tolist(),
+        default=data.select_dtypes('object').columns.tolist()[:1]
+    )
+    if cat_columns:  # если выбран хотя бы один столбец
+        agg_column = st.selectbox(
+            "Выберите числовой столбец для агрегации",
+            options=data.select_dtypes('number').columns.tolist()
+        )
+        display_data = data.groupby(cat_columns)[agg_column].mean().reset_index()
+        st.write(f"Группировка по {', '.join(cat_columns)}, среднее значение {agg_column}")
+
 
 # Отображаем таблицу
 st.subheader("Таблица данных")
