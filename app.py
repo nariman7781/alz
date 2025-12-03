@@ -16,16 +16,7 @@ except FileNotFoundError:
 st.subheader("Настройки таблицы")
 
 # --------------------
-# Фильтры таблицы
-# --------------------
-if st.checkbox("Удалить дубликаты"):
-    data = data.drop_duplicates()
-
-if st.checkbox("Удалить строки с пропущенными значениями"):
-    data = data.dropna()
-
-# --------------------
-# Выбор столбцов
+# Инициализация выбранных столбцов
 # --------------------
 if 'selected_columns' not in st.session_state:
     st.session_state.selected_columns = data.columns[:5].tolist()
@@ -41,7 +32,16 @@ st.session_state.selected_columns = st.multiselect(
     default=st.session_state.selected_columns
 )
 
+# --------------------
+# Фильтры по выбранным столбцам
+# --------------------
 filtered_data = data[st.session_state.selected_columns]
+
+if st.checkbox("Удалить дубликаты (по выбранным столбцам)"):
+    filtered_data = filtered_data.drop_duplicates()
+
+if st.checkbox("Удалить строки с пропущенными значениями (по выбранным столбцам)"):
+    filtered_data = filtered_data.dropna()
 
 # --------------------
 # Ограничение по количеству строк
