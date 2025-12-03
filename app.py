@@ -20,9 +20,17 @@ if st.checkbox("Удалить дубликаты"):
 if st.checkbox("Удалить строки с пропущенными значениями"):
     data = data.dropna()
 
-# Выбор столбцов для отображения
-columns = st.multiselect("Выберите столбцы для отображения", options=data.columns, default=data.columns[:5])
-filtered_data = data[columns]
+# Кнопка "All" для выбора всех столбцов
+if st.button("All"):
+    selected_columns = data.columns.tolist()
+else:
+    selected_columns = st.multiselect(
+        "Выберите столбцы для отображения", 
+        options=data.columns, 
+        default=data.columns[:5]
+    )
+
+filtered_data = data[selected_columns]
 
 # Ограничение по количеству строк
 num_rows = st.slider("Количество первых строк для отображения", min_value=5, max_value=len(filtered_data), value=20)
