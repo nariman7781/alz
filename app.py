@@ -1,9 +1,7 @@
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 
 st.set_page_config(page_title="Alzheimer Dataset Viewer", layout="wide")
-
 st.title("Alzheimer Dataset Interactive Viewer")
 
 # Загружаем данные
@@ -13,30 +11,34 @@ except FileNotFoundError:
     st.error("Файл alzheimers_disease_data.csv не найден! Проверьте название и расположение файла.")
     st.stop()
 
-# Показываем фильтр для выбора столбцов
-numeric_cols = data.select_dtypes('number').columns.tolist()
-selected_cols = st.multiselect(
-    "Выберите числовые столбцы для графика", 
-    numeric_cols, 
-    default=numeric_cols[:3]
-)
+st.subheader("Настройки таблицы")
 
-# Ограничиваем количество строк для графика для ускорения работы
-max_rows = st.slider(
-    "Количество строк для графика", 
-    min_value=10, 
-    max_value=min(1000, len(data)), 
-    value=200
-)
+# Фильтры и работа с таблицей
+if st.checkbox("Удалить дубликаты"):
+    data = data.drop_duplicates()
 
-# Таблица
-st.subheader("Данные")
-st.dataframe(data.head(max_rows))
+if st.checkbox("Удалить строки с пропущенными значениями"):
+    data = data.dropna()
 
-# График
-if selected_cols:
-    st.subheader("График выбранных столбцов")
-    fig = px.bar(data.head(max_rows), x=data.index[:max_rows], y=selected_cols)
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Выберите хотя бы один столбец для построения графика.")
+# Выбор столбцов для отображения
+columns = st.multiselect("Выберите столбцы для отображения", options=data.columns, default=data.columns[:5])
+filtered_data = data[columns]
+
+# Ограничение по количеству строк
+num_rows = st.slider("Количество первых строк для отображения", min_value=5, max_value=len(filtered_data), value=20)
+display_data = filtered_data.head(num_rows)
+
+# Простейшее объединение / группировка
+if st.checkbox("Группировка по категориальному столбцу"):
+    cat_column = st.selectbox("Выберите столбец для группировки", options=data.select_dtypes('object').columns.tolist())
+    agg_column = st.selectbox("Выберите числовой столбец для агрегации", options=data.select_dtypes('number').columns.tolist())
+    display_data = data.groupby(cat_column)[agg_column].mean().reset_index()
+    st.write(f"Группировка по {cat_column}, среднее значение {agg_column}")
+
+# Отображаем таблицу
+st.subheader("Таблица данных")
+st.dataframe(display_data)
+
+# Кнопка для скачивания
+csv = display_data.to_csv(index=False)
+st.download_button("Скачать CSV", csv, "filtered_data.csv", "text/csv")
