@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 
 # Загружаем данные
-data = pd.read_csv('alzheimers_disease_data.csv.')
+data = pd.read_csv('alzheimers_disease_data.csv')
 
 st.title("Alzheimer Dataset Viewer")
 
