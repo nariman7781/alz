@@ -20,17 +20,22 @@ if st.checkbox("Удалить дубликаты"):
 if st.checkbox("Удалить строки с пропущенными значениями"):
     data = data.dropna()
 
-# Кнопка "All" для выбора всех столбцов
-if st.button("All"):
-    selected_columns = data.columns.tolist()
-else:
-    selected_columns = st.multiselect(
-        "Выберите столбцы для отображения", 
-        options=data.columns, 
-        default=data.columns[:5]
-    )
+# Инициализация состояния для выбранных столбцов
+if 'selected_columns' not in st.session_state:
+    st.session_state.selected_columns = data.columns[:5].tolist()
 
-filtered_data = data[selected_columns]
+# Кнопка "All"
+if st.button("All"):
+    st.session_state.selected_columns = data.columns.tolist()
+
+# Multiselect для выбора столбцов, с привязкой к session_state
+st.session_state.selected_columns = st.multiselect(
+    "Выберите столбцы для отображения",
+    options=data.columns,
+    default=st.session_state.selected_columns
+)
+
+filtered_data = data[st.session_state.selected_columns]
 
 # Ограничение по количеству строк
 num_rows = st.slider("Количество первых строк для отображения", min_value=5, max_value=len(filtered_data), value=20)
