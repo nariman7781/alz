@@ -91,5 +91,67 @@ with st.expander("Группировка по столбцам", expanded=False)
 st.subheader("Таблица данных")
 st.dataframe(display_data)
 
+# --------------------
+# Раздел: Графики
+# --------------------
+st.subheader("Графики")
+
+chart_type = st.selectbox(
+    "Выберите тип графика",
+    [
+        "Bar chart / Column chart",
+        "Histogram",
+        "Box plot",
+        "Scatter plot",
+        "Line chart"
+    ]
+)
+
+numeric_cols = data.select_dtypes('number').columns.tolist()
+all_cols = data.columns.tolist()
+
+# BAR / COLUMN
+if chart_type == "Bar chart / Column chart":
+    x_col = st.selectbox("X (категориальный столбец)", all_cols)
+    y_col = st.selectbox("Y (числовой столбец)", numeric_cols)
+
+    fig = px.bar(data, x=x_col, y=y_col)
+    st.plotly_chart(fig, use_container_width=True)
+
+# HISTOGRAM
+elif chart_type == "Histogram":
+    col = st.selectbox("Столбец для гистограммы", numeric_cols)
+    bins = st.slider("Количество корзин (bins)", 5, 100, 30)
+
+    fig = px.histogram(data, x=col, nbins=bins)
+    st.plotly_chart(fig, use_container_width=True)
+
+# BOX PLOT
+elif chart_type == "Box plot":
+    y_col = st.selectbox("Числовой столбец", numeric_cols)
+    x_col = st.selectbox("Группировка по", all_cols)
+
+    fig = px.box(data, x=x_col, y=y_col)
+    st.plotly_chart(fig, use_container_width=True)
+
+# SCATTER PLOT
+elif chart_type == "Scatter plot":
+    x = st.selectbox("X", numeric_cols)
+    y = st.selectbox("Y", numeric_cols)
+
+    color = st.selectbox("Цветовая метка (опционально)", [None] + all_cols)
+
+    fig = px.scatter(data, x=x, y=y, color=color)
+    st.plotly_chart(fig, use_container_width=True)
+
+# LINE CHART
+elif chart_type == "Line chart":
+    x = st.selectbox("X (обычно время или индекс)", all_cols)
+    y = st.selectbox("Y (числовой столбец)", numeric_cols)
+
+    fig = px.line(data, x=x, y=y)
+    st.plotly_chart(fig, use_container_width=True)
+
+
 csv = display_data.to_csv(index=False)
 st.download_button("Скачать CSV", csv, "filtered_data.csv", "text/csv")
