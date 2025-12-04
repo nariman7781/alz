@@ -115,7 +115,7 @@ if chart_type == "Bar chart / Column chart":
     x_col = st.selectbox("X (категориальный столбец)", all_cols)
     y_col = st.selectbox("Y (числовой столбец)", numeric_cols)
 
-    fig = px.bar(data, x=x_col, y=y_col)
+    fig = px.bar(display_data, x=x_col, y=y_col)
     st.plotly_chart(fig, use_container_width=True)
 
 # HISTOGRAM
@@ -123,7 +123,7 @@ elif chart_type == "Histogram":
     col = st.selectbox("Столбец для гистограммы", numeric_cols)
     bins = st.slider("Количество корзин (bins)", 5, 100, 30)
 
-    fig = px.histogram(data, x=col, nbins=bins)
+    fig = px.histogram(display_data, x=col, nbins=bins)
     st.plotly_chart(fig, use_container_width=True)
 
 # BOX PLOT
@@ -131,7 +131,7 @@ elif chart_type == "Box plot":
     y_col = st.selectbox("Числовой столбец", numeric_cols)
     x_col = st.selectbox("Группировка по", all_cols)
 
-    fig = px.box(data, x=x_col, y=y_col)
+    fig = px.box(display_data, x=x_col, y=y_col)
     st.plotly_chart(fig, use_container_width=True)
 
 # SCATTER PLOT
@@ -141,7 +141,7 @@ elif chart_type == "Scatter plot":
 
     color = st.selectbox("Цветовая метка (опционально)", [None] + all_cols)
 
-    fig = px.scatter(data, x=x, y=y, color=color)
+    fig = px.scatter(display_data, x=x, y=y, color=color)
     st.plotly_chart(fig, use_container_width=True)
 
 # LINE CHART
@@ -149,7 +149,7 @@ elif chart_type == "Line chart":
     x = st.selectbox("X (обычно время или индекс)", all_cols)
     y = st.selectbox("Y (числовой столбец)", numeric_cols)
 
-    fig = px.line(data, x=x, y=y)
+    fig = px.line(display_data, x=x, y=y)
     st.plotly_chart(fig, use_container_width=True)
 
 
