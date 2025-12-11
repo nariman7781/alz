@@ -53,7 +53,7 @@ st.dataframe(display_data)
 st.subheader("Группировка данных")
 
 grouped_table = None
-if st.checkbox("Включить группировку (не зависит от фильтров)"):
+if st.checkbox("Включить группировку"):
     # Берём все столбцы из базы данных
     all_cols = data.columns.tolist()
 
