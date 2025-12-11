@@ -84,7 +84,7 @@ if st.checkbox("Включить группировку"):
         st.info("Нет подходящих столбцов для группировки")
 
 # ------------------------
-# Графики (берутся из базы данных)
+# Графики
 # ------------------------
 st.subheader("Графики")
 chart_type = st.selectbox(
@@ -95,40 +95,42 @@ chart_type = st.selectbox(
 numeric_cols = data.select_dtypes("number").columns.tolist()
 all_cols = data.columns.tolist()
 
-
 if chart_type == "Bar chart":
     x_col = st.selectbox("X (категориальный)", all_cols)
     y_col = st.selectbox("Y (числовой)", numeric_cols)
-    safe_plot(px.bar, data, x=x_col, y=y_col)
+    fig = px.bar(data, x=x_col, y=y_col)
+    st.plotly_chart(fig, use_container_width=True)
 
 elif chart_type == "Histogram":
     col = st.selectbox("Столбец", numeric_cols)
     bins = st.slider("Количество корзин", 5, 100, 30)
-    safe_plot(px.histogram, data, x=col, nbins=bins)
+    fig = px.histogram(data, x=col, nbins=bins)
+    st.plotly_chart(fig, use_container_width=True)
 
 elif chart_type == "Box plot":
     x_col = st.selectbox("Группировка", all_cols)
     y_col = st.selectbox("Значения", numeric_cols)
-    safe_plot(px.box, data, x=x_col, y=y_col)
+    fig = px.box(data, x=x_col, y=y_col)
+    st.plotly_chart(fig, use_container_width=True)
 
 elif chart_type == "Scatter plot":
     x = st.selectbox("X", numeric_cols)
     y = st.selectbox("Y", numeric_cols)
     color = st.selectbox("Цвет (опционально)", [None] + all_cols)
-    kwargs = {"x": x, "y": y}
     if color:
-        kwargs["color"] = color
-    safe_plot(px.scatter, data, **kwargs)
+        fig = px.scatter(data, x=x, y=y, color=color)
+    else:
+        fig = px.scatter(data, x=x, y=y)
+    st.plotly_chart(fig, use_container_width=True)
 
 elif chart_type == "Line chart":
     x = st.selectbox("X", all_cols)
     y = st.selectbox("Y", numeric_cols)
-    safe_plot(px.line, data, x=x, y=y)
+    fig = px.line(data, x=x, y=y)
+    st.plotly_chart(fig, use_container_width=True)
 
 elif chart_type == "Pie chart":
     labels = st.selectbox("Категории", all_cols)
     values = st.selectbox("Значения", numeric_cols)
-    safe_plot(px.pie, data, names=labels, values=values)
-
-# ------------------------
-# С
+    fig = px.pie(data, names=labels, values=values)
+    st.plotly_chart(fig, use_container_width=True)
