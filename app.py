@@ -40,32 +40,45 @@ with col2:
         filtered_data = filtered_data.dropna()
 
 # ------------------------
-# Настройка таблицы
-# ------------------------
-st.subheader("Таблица данных")
-num_rows = st.slider("Количество первых строк для отображения", 5, len(filtered_data), 20)
-display_data = filtered_data.head(num_rows)
-st.dataframe(display_data)
-
-# ------------------------
 # Группировка
 # ------------------------
 st.subheader("Группировка данных")
+grouped = False
 if st.checkbox("Включить группировку"):
-    cat_cols = data.select_dtypes("object").columns.tolist()
-    for col in data.select_dtypes("number").columns:
-        if data[col].nunique() <= 20:
+    available_cols = filtered_data.columns.tolist()
+
+    # Категориальные для группировки
+    cat_cols = filtered_data.select_dtypes("object").columns.tolist()
+    for col in filtered_data.select_dtypes("number").columns:
+        if filtered_data[col].nunique() <= 20:
             cat_cols.append(col)
 
     if cat_cols:
-        group_cols = st.multiselect("Выберите столбцы для группировки", cat_cols, default=cat_cols[:1])
-        num_cols = data.select_dtypes("number").columns.tolist()
-        if group_cols:
+        group_cols = st.multiselect(
+            "Выберите столбцы для группировки",
+            cat_cols,
+            default=cat_cols[:1]
+        )
+        num_cols = filtered_data.select_dtypes("number").columns.tolist()
+        if group_cols and num_cols:
             agg_col = st.selectbox("Числовой столбец для агрегации", num_cols)
-            display_data = data.groupby(group_cols)[agg_col].mean().reset_index()
+            display_data = filtered_data.groupby(group_cols)[agg_col].mean().reset_index()
             st.write(f"Группировка по {', '.join(group_cols)}, среднее {agg_col}")
+            grouped = True
+        else:
+            st.warning("Выберите хотя бы один столбец для группировки и один числовой для агрегации")
     else:
         st.info("Нет подходящих столбцов для группировки")
+
+if not grouped:
+    display_data = filtered_data
+
+# ------------------------
+# Настройка таблицы
+# ------------------------
+st.subheader("Таблица данных")
+num_rows = st.slider("Количество первых строк для отображения", 5, len(display_data), 20)
+st.dataframe(display_data.head(num_rows))
 
 # ------------------------
 # Графики
