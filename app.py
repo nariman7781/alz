@@ -95,13 +95,6 @@ chart_type = st.selectbox(
 numeric_cols = data.select_dtypes("number").columns.tolist()
 all_cols = data.columns.tolist()
 
-def safe_plot(func, df, **kwargs):
-    missing = [col for col in kwargs.values() if isinstance(col, str) and col not in df.columns]
-    if missing:
-        st.error(f"Следующие столбцы отсутствуют в данных: {', '.join(missing)}")
-        return
-    fig = func(df, **kwargs)
-    st.plotly_chart(fig, use_container_width=True)
 
 if chart_type == "Bar chart":
     x_col = st.selectbox("X (категориальный)", all_cols)
