@@ -15,7 +15,7 @@ except FileNotFoundError:
     st.stop()
 
 # ------------------------
-# Выбор столбцов и фильтры
+# Выбор столбцов и фильтры (только для отображения)
 # ------------------------
 st.subheader("Выбор столбцов и фильтры")
 
@@ -31,30 +31,17 @@ if not selected_columns:
 
 filtered_data = data[selected_columns]
 
-col1, col2 = st.columns(2)
-with col1:
-    remove_dupes = st.checkbox("Удалить дубликаты")
-with col2:
-    remove_na = st.checkbox("Удалить строки с пропусками")
-
-# Применяем фильтры к таблице
-if remove_dupes:
-    filtered_data = filtered_data.drop_duplicates()
-if remove_na:
-    filtered_data = filtered_data.dropna()
-
-# ------------------------
-# Отображение основной таблицы
-# ------------------------
-st.subheader("Таблица данных")
+# Таблица для отображения
 num_rows = st.slider("Количество первых строк для отображения", 5, len(filtered_data), 20)
 display_data = filtered_data.head(num_rows)
+st.subheader("Таблица данных")
 st.dataframe(display_data)
 
 # ------------------------
 # Группировка из базы данных (отдельная таблица)
 # ------------------------
 st.subheader("Группировка данных")
+
 grouped_table = None
 if st.checkbox("Включить группировку (не зависит от фильтров)"):
     # Все столбцы базы
@@ -75,10 +62,26 @@ if st.checkbox("Включить группировку (не зависит о�
         num_cols = data.select_dtypes("number").columns.tolist()
         if group_cols and num_cols:
             agg_col = st.selectbox("Числовой столбец для агрегации", num_cols)
-            # Исключаем agg_col из группировки, если совпадает
+
+            # Чекбоксы для удаления дубликатов и пропусков только в группировке
+            col1, col2 = st.columns(2)
+            with col1:
+                remove_dupes_group = st.checkbox("Удалить дубликаты в группировке")
+            with col2:
+                remove_na_group = st.checkbox("Удалить пропуски в группировке")
+
+            grouped_data = data.copy()
+
+            # Применяем очистку только к нужным столбцам
             group_cols_for_grouping = [col for col in group_cols if col != agg_col]
 
-            grouped_table = data.groupby(group_cols_for_grouping)[agg_col].mean().reset_index()
+            if remove_dupes_group:
+                grouped_data = grouped_data.drop_duplicates(subset=group_cols_for_grouping + [agg_col])
+            if remove_na_group:
+                grouped_data = grouped_data.dropna(subset=group_cols_for_grouping + [agg_col])
+
+            # Группировка
+            grouped_table = grouped_data.groupby(group_cols_for_grouping)[agg_col].mean().reset_index()
             st.write("Результат группировки:")
             st.dataframe(grouped_table)
         else:
