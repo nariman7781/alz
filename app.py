@@ -17,30 +17,15 @@ except FileNotFoundError:
 all_columns = data.columns.tolist()
 
 # ------------------------
-# Session State для multiselect
-# ------------------------
-if "selected_columns" not in st.session_state:
-    st.session_state.selected_columns = all_columns[:5]
-
-# ------------------------
 # Выбор столбцов
 # ------------------------
 st.subheader("Выбор столбцов")
 
-col1, col2 = st.columns([3, 1])
-
-with col1:
-    selected_columns = st.multiselect(
-        "Выберите столбцы",
-        all_columns,
-        default=st.session_state.selected_columns,
-        key="selected_columns"
-    )
-
-with col2:
-    if st.button("Все столбцы"):
-        st.session_state.selected_columns = all_columns
-        st.rerun()   # <<< фикс бага
+selected_columns = st.multiselect(
+    "Выберите столбцы",
+    all_columns,
+    default=all_columns[:5]
+)
 
 if not selected_columns:
     st.warning("Выберите хотя бы один столбец.")
@@ -122,8 +107,6 @@ chart_type = st.selectbox(
 
 numeric_cols = data.select_dtypes("number").columns.tolist()
 all_cols = data.columns.tolist()
-
-# Улучшенная цветовая схема
 color_template = "plotly"
 
 # BAR
