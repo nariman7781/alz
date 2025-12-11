@@ -15,7 +15,7 @@ except FileNotFoundError:
     st.stop()
 
 # ------------------------
-# Фильтры и выбор столбцов
+# Выбор столбцов и фильтры
 # ------------------------
 st.subheader("Выбор столбцов и фильтры")
 
@@ -33,11 +33,15 @@ filtered_data = data[selected_columns]
 
 col1, col2 = st.columns(2)
 with col1:
-    if st.checkbox("Удалить дубликаты"):
-        filtered_data = filtered_data.drop_duplicates()
+    remove_dupes = st.checkbox("Удалить дубликаты")
 with col2:
-    if st.checkbox("Удалить строки с пропусками"):
-        filtered_data = filtered_data.dropna()
+    remove_na = st.checkbox("Удалить строки с пропусками")
+
+# Применяем фильтры к таблице
+if remove_dupes:
+    filtered_data = filtered_data.drop_duplicates()
+if remove_na:
+    filtered_data = filtered_data.dropna()
 
 # ------------------------
 # Отображение основной таблицы
@@ -51,13 +55,12 @@ st.dataframe(display_data)
 # Группировка из базы данных (отдельная таблица)
 # ------------------------
 st.subheader("Группировка данных")
-
 grouped_table = None
-if st.checkbox("Включить группировку"):
-    # Берём все столбцы из базы данных
+if st.checkbox("Включить группировку (не зависит от фильтров)"):
+    # Все столбцы базы
     all_cols = data.columns.tolist()
 
-    # Категориальные столбцы для группировки
+    # Категориальные для группировки
     cat_cols = data.select_dtypes("object").columns.tolist()
     for col in data.select_dtypes("number").columns:
         if data[col].nunique() <= 20:
@@ -72,7 +75,7 @@ if st.checkbox("Включить группировку"):
         num_cols = data.select_dtypes("number").columns.tolist()
         if group_cols and num_cols:
             agg_col = st.selectbox("Числовой столбец для агрегации", num_cols)
-            # Исключаем agg_col из группировки на всякий случай
+            # Исключаем agg_col из группировки, если совпадает
             group_cols_for_grouping = [col for col in group_cols if col != agg_col]
 
             grouped_table = data.groupby(group_cols_for_grouping)[agg_col].mean().reset_index()
@@ -84,7 +87,7 @@ if st.checkbox("Включить группировку"):
         st.info("Нет подходящих столбцов для группировки")
 
 # ------------------------
-# Графики
+# Графики (берутся из базы данных)
 # ------------------------
 st.subheader("Графики")
 chart_type = st.selectbox(
@@ -134,3 +137,9 @@ elif chart_type == "Pie chart":
     values = st.selectbox("Значения", numeric_cols)
     fig = px.pie(data, names=labels, values=values)
     st.plotly_chart(fig, use_container_width=True)
+
+# ------------------------
+# Скачивание CSV (только основной таблицы)
+# ------------------------
+csv = display_data.to_csv(index=False)
+st.download_button("Скачать CSV", csv, "filtered_data.csv", "text/csv")
