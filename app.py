@@ -5,30 +5,30 @@ import plotly.express as px
 st.set_page_config(page_title="Alzheimer Dataset Viewer", layout="wide")
 st.title("Alzheimer Dataset Viewer")
 
-# ------------------------
+
 # Загружаем данные
-# ------------------------
+
 try:
     original_data = pd.read_csv("alzheimers_disease_data.csv")
 except FileNotFoundError:
     st.error("Файл alzheimers_disease_data.csv не найден!")
     st.stop()
 
-# копия чтобы всегда хранить оригинал
+
 data = original_data.copy()
 
-# ------------------------
-# Глобальная очистка данных (на всю таблицу)
-# ------------------------
-st.subheader("Очистка данных (вся таблица)")
+
+# Глобальная очистка данных
+
+st.subheader("Очистка данных")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    remove_global_dupes = st.checkbox("Удалить дубликаты (вся таблица)")
+    remove_global_dupes = st.checkbox("Удалить дубликаты")
 
 with col2:
-    remove_global_nans = st.checkbox("Удалить строки с пропусками (вся таблица)")
+    remove_global_nans = st.checkbox("Удалить строки с пропусками")
 
 if remove_global_dupes:
     before = len(data)
@@ -40,9 +40,9 @@ if remove_global_nans:
     data = data.dropna()
     st.success(f"Удалено строк с пропусками: {before - len(data)}")
 
-# ------------------------
-# Выбор столбцов и фильтры (только для отображения)
-# ------------------------
+
+# Выбор столбцов и фильтры
+
 st.subheader("Выбор столбцов и фильтры")
 
 selected_columns = st.multiselect(
@@ -64,15 +64,15 @@ display_data = filtered_data.head(num_rows)
 st.subheader("Таблица данных")
 st.dataframe(display_data)
 
-# ------------------------
-# Группировка (работает только с основной таблицей data)
-# ------------------------
+
+# Группировка
+
 st.subheader("Группировка данных")
 
 grouped_table = None
-if st.checkbox("Включить группировку (на чистой таблице)"):
+if st.checkbox("Включить группировку"):
 
-    # Категориальные колонки
+    
     cat_cols = data.select_dtypes("object").columns.tolist()
     for col in data.select_dtypes("number").columns:
         if data[col].nunique() <= 20:
@@ -90,7 +90,7 @@ if st.checkbox("Включить группировку (на чистой та�
         if group_cols and num_cols:
             agg_col = st.selectbox("Числовой столбец для агрегации", num_cols)
 
-            # ЧИСТАЯ ГРУППИРОВКА — без удаления пропусков/дубликатов
+            
             grouped_table = data.groupby(group_cols)[agg_col].mean().reset_index()
 
             st.write("Результат группировки:")
@@ -101,9 +101,9 @@ if st.checkbox("Включить группировку (на чистой та�
     else:
         st.info("Нет подходящих столбцов для группировки")
 
-# ------------------------
-# Графики (рисуются с основной таблицы data)
-# ------------------------
+
+# Графики
+
 st.subheader("Графики")
 chart_type = st.selectbox(
     "Выберите тип графика",
@@ -149,9 +149,3 @@ elif chart_type == "Pie chart":
     values = st.selectbox("Значения", numeric_cols)
     fig = px.pie(data, names=labels, values=values)
     st.plotly_chart(fig, use_container_width=True)
-
-# ------------------------
-# Скачивание CSV (только отображаемых данных)
-# ------------------------
-csv = display_data.to_csv(index=False)
-st.download_button("Скачать CSV", csv, "filtered_data.csv", "text/csv")
